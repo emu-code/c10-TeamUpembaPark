@@ -54,12 +54,6 @@ This project uses the benchmark corpus provided for the TRI AI Saturdays / Kaggl
 
 The dataset is a complaint-routing benchmark focused on multi-class text classification. The metadata indicates a ten-way complaint routing task scored using Kaggle F1 (balanced), with `ComplaintId`, `text`, `Category`, and `FamilyId` fields in the training data.
 
-### Relationship to the target problem
-
-This benchmark is not a direct copy of the CFPB consumer complaint database. Instead, it provides a practical experimental dataset for developing the underlying NLP and transformer workflow. The broader objective remains to investigate how similar techniques could later be applied to real consumer complaint data under appropriate privacy and governance constraints.
-
----
-
 ## 🔄 Project Workflow
 
 The project follows a standard machine-learning workflow:
@@ -84,38 +78,6 @@ Prediction
 Evaluation & Error Analysis
 ```
 
-### 1. Data exploration
-
-The dataset is examined to understand text characteristics, class structure, and potential issues that may affect model development.
-
-### 2. Data preparation
-
-The text data is prepared for model training and evaluation. This includes formatting text inputs and aligning them with the classification task.
-
-### 3. Baseline
-
-A baseline model provides a reference point for comparing the transformer approach.
-
-### 4. Transformer-based modelling
-
-A pretrained transformer model is adapted to the complaint classification task. Attention-based architectures are well suited to capturing context and relationships within complaint text.
-
-### 5. Fine-tuning
-
-The pretrained model is fine-tuned on the benchmark dataset so that it learns task-specific representations.
-
-### 6. Evaluation
-
-Predictions are evaluated using the task-specific metric, with attention to class-level performance and common mistakes.
-
----
-
-## 🧠 Why Transformers?
-
-Traditional text classifiers often depend on manually engineered features or simpler embeddings. Transformer models use attention mechanisms to capture relationships between tokens and context across a sequence. This is particularly useful for complaint text, where the meaning of a case may depend on interactions between multiple phrases rather than isolated keywords.
-
----
-
 ## 🔍 Expected Outcomes
 
 The project is intended to provide insight into:
@@ -139,26 +101,6 @@ Expected outcomes include:
 
 ---
 
-## ⚠️ Scope Note
-
-The target application remains intelligent consumer complaint classification and routing. However, the dataset used in Cohort 10 is a benchmark dataset rather than the real-world consumer-complaint corpus originally envisioned for the product.
-
-The project therefore functions as a technical proof of concept for the NLP workflow and a practical learning exercise, while future work would need to validate the model on real consumer complaint data under appropriate access, privacy, and governance conditions.
-
----
-
-## 🛡️ Responsible AI Considerations
-
-A real-world complaint classification system would need to account for more than raw model accuracy.
-
-Key considerations include:
-
-* Privacy: complaints may contain sensitive personal or financial information.
-* Fairness: model performance may vary by complaint type, language pattern, or demographic group.
-* Transparency: users should understand the role and limits of automated classification.
-* Human oversight: automated predictions should support human reviewers rather than replace judgment.
-* Error management: misclassification can affect routing and prioritisation.
-* Data quality: weak or imbalanced training data can lead to unreliable outputs.
 
 ---
 
