@@ -1,175 +1,94 @@
-# 🤖 Intelligent Consumer Complaint Classification Using Transformers
+# ComplaintSense: Consumer Complaint Classification
 
-## 📌 Project Overview
+## Overview
 
-Consumer complaints contain valuable information about customer experiences, service failures, and product issues. The large volume and unstructured nature of complaint narratives make manual triage and routing difficult.
+ComplaintSense is a 10-class consumer complaint classification project designed to automatically route short complaints to the most relevant category. The project compares a lightweight TF-IDF baseline with a transformer-based DistilBERT classifier and evaluates both using Balanced F1 (macro F1).
 
-Team Upemba explored a transformer-based natural language processing (NLP) approach for intelligent complaint classification and routing. The goal was to build a model that can assign a complaint to the most relevant category while supporting human review for cases that need contextual judgment.
-
-For Cohort 10, the team used the benchmark dataset provided through the TRI AI Saturdays / Kaggle challenge rather than the original CFPB Consumer Complaint Database. This allowed the team to prototype the classification workflow within the project timeline while keeping the broader application goal in view.
+The final approach fine-tunes DistilBERT on the competition training data and generates predictions for the 160-row test set.
 
 ---
 
-## 🎯 Objectives
+## Dataset
 
-The project aims to:
+The project uses the [ComplaintSense benchmark dataset](https://www.kaggle.com/competitions/complaint-sense-consumer-complaint-classification-challenge/overview) supplied through the competition. It contains **380 labeled training complaints** and **160 unlabeled test complaints** across 10 categories.
 
-* Build an NLP pipeline for complaint classification.
-* Explore the structure and characteristics of the benchmark dataset.
-* Establish a baseline for comparison.
-* Test a transformer-based architecture for text classification.
-* Fine-tune a pretrained language model.
-* Evaluate model performance using task-appropriate metrics.
-* Analyse errors and difficult categories.
-* Consider class imbalance, fairness, and generalisation.
-* Support human-in-the-loop review for large-scale complaint handling.
+Training records contain a complaint identifier, complaint text, target `Category`, and `FamilyId`. `FamilyId` identifies complaints derived from the same underlying scenario and was used to prevent related complaint variants from appearing in both training and validation sets.
+
+The 10 categories are:
+
+`account_access`, `billing`, `customer_service`, `delivery_shipping`, `fraud_unauthorized`, `general_inquiry`, `product_defect`, `refund_return`, `subscription_cancel`, and `warranty_repair`.
+
+No external data was added. The competition data was used as supplied.
 
 ---
 
-## ⚙️ Tools & Technologies
+## Training Pipeline
 
-* Python
-* Pandas
-* NumPy
-* Scikit-learn
-* PyTorch
-* Hugging Face Transformers
-* Hugging Face Datasets
-* Jupyter Notebook
-* Git & GitHub
+### Preprocessing and validation
 
----
+The complaint text was tokenized using the DistilBERT tokenizer. Text was truncated to a maximum sequence length of 128 tokens.
 
-## 📊 Dataset
+A family-aware validation split was used so that related complaint variants would not cross the training/validation boundary. The resulting split contained **285 training rows from 57 families** and **95 validation rows from 19 families**.
 
-### Benchmark dataset
+### TF-IDF baseline
 
-This project uses the benchmark corpus provided for the TRI AI Saturdays / Kaggle challenge:
+A TF-IDF-based classifier was implemented as a lightweight baseline. It was evaluated using the same validation data and achieved a local **Balanced F1 of 0.2596**.
 
-* `data/train_complaints.csv` — training data with complaint text and category labels.
-* `data/test_complaints.csv` — held-out test data without labels.
-* `data/sample_submission.csv` — template for model submissions.
-* `data/baseline_submission.csv` — baseline model output.
-* `data/dataset-metadata.json` — metadata describing the challenge dataset and schema.
+The baseline provided a reference point for assessing the transformer-based approach.
 
-The dataset is a complaint-routing benchmark focused on multi-class text classification. The metadata indicates a ten-way complaint routing task scored using Kaggle F1 (balanced), with `ComplaintId`, `text`, `Category`, and `FamilyId` fields in the training data.
+### DistilBERT classifier
 
-## 🔄 Project Workflow
-
-The project follows a standard machine-learning workflow:
-
-```text
-Data
-  ↓
-Exploratory Data Analysis
-  ↓
-Data Preparation
-  ↓
-Baseline
-  ↓
-Tokenization
-  ↓
-Transformer Model
-  ↓
-Fine-Tuning
-  ↓
-Prediction
-  ↓
-Evaluation & Error Analysis
-```
-
-## 🔍 Expected Outcomes
-
-The project is intended to provide insight into:
-
-* The structure and characteristics of the benchmark complaint dataset.
-* Patterns in complaint categories and text variation.
-* The effectiveness of transformer-based models for text classification.
-* The impact of fine-tuning on model performance.
-* Categories that are harder for the model to classify.
-* The influence of class imbalance and data quality.
-* The limitations of using a benchmark dataset for a real-world problem.
-
-Expected outcomes include:
-
-* A documented preprocessing and modelling workflow.
-* A baseline implementation.
-* A transformer-based classification model.
-* Evaluation and error analysis.
-* A reproducible notebook.
-* Responsible-AI documentation and project rationale.
+The final model uses a pretrained DistilBERT transformer with a 10-class sequence-classification head. The model was fine-tuned using the Hugging Face `Trainer` framework and evaluated on the held-out validation set after each training epoch.
 
 ---
 
+## Evaluation
+
+Balanced F1 (macro F1) was used because it gives each complaint category equal importance rather than allowing larger categories to dominate the evaluation.
+
+The TF-IDF baseline achieved a **Balanced F1 of 0.2596** on the family-aware validation split.
+
+The DistilBERT model improved substantially, reaching its best validation **Balanced F1 of 0.4380 at epoch 7**. The model's validation loss continued to decrease after this point, but Balanced F1 fluctuated, showing that lower loss did not necessarily translate into better classification performance.
+
+Validation error analysis identified **51 incorrect predictions out of 95 validation examples**, with the largest number of errors occurring in `delivery_shipping`, `subscription_cancel`, and `customer_service`.
+
+The final model was then used to generate predictions for the 160 unlabeled test complaints.
 
 ---
 
-## 🗂️ Repository Structure
+## Reproduction
 
-```text
-c10-TeamUpemba/
-├── README.md
-├── data/
-│   ├── baseline_submission.csv
-│   ├── dataset-metadata.json
-│   ├── sample_submission.csv
-│   ├── test_complaints.csv
-│   └── train_complaints.csv
-├── docs/
-│   ├── data_card.pdf
-│   ├── impact_statement_card.pdf
-│   ├── problem_statement.pdf
-│   └── stakeholder_engagement.pdf
-├── notebooks/
-│   └── intelligent-complaint.ipynb
-└── .git/
-```
+1. **Clone the repository:**
 
-### 📓 `notebooks/`
+   `git clone https://github.com/emu-code/c10-team-upembapark.git`
 
-The primary experimental workflow is contained in `notebooks/intelligent-complaint.ipynb`. This notebook documents the dataset exploration, baseline, transformer-based modelling, and evaluation process.
+2. **Navigate to the repository folder:**
 
-### 📁 `docs/`
+   `cd c10-team-upembapark`
 
-The `docs/` folder contains project documents related to the challenge context, data understanding, impact reflection, and stakeholder considerations.
+3. **Install the required dependencies:**
 
-### 📁 `data/`
+   `pip install -r requirements.txt`
 
-The `data/` folder contains the benchmark dataset and submission files used during model development and evaluation.
+4. **Open the project notebook** and run the cells in order from the beginning to reproduce preprocessing, model training, evaluation, and submission generation.
 
-Note: This repository currently contains a single notebook-based workflow and does not include a separate `scripts/` folder or a `requirements.txt` file at the project root.
+5. **Attach the ComplaintSense competition dataset** when prompted if running the notebook in Kaggle.
 
+The notebook generates the final `submission.csv` containing the 160 test predictions.
+
+N/B: The pretrained DistilBERT model is not stored in the repository due to its size. When the notebook is executed, it automatically downloads distilbert-base-uncased from Hugging Face and fine-tunes it on the competition training data.
 ---
 
-## 🚀 Future Direction
+## Appendix
 
-The next stage of the project would be to evaluate the approach on a larger, real-world consumer complaint dataset, subject to the necessary access, privacy, and governance requirements.
+### Team Members
 
-Possible future work includes:
+* [Adebobajo Inioluwa](https://github.com/adebobajoinioluwa) — Team Lead
+* [Emumena Oweh](https://github.com/emu-code) 
+* [Adedotun Onasanya](https://github.com/adedotguy)
+* [David Arfo](https://github.com/Daxe5)
 
-* Testing on a broader real-world complaint dataset.
-* Improving performance across multiple complaint categories.
-* Addressing class imbalance.
-* Conducting more detailed error analysis.
-* Evaluating fairness across complaint groups and categories.
-* Building a human-in-the-loop review workflow.
-* Adding explainability features for reviewer-facing decisions.
-* Exploring complaint routing and prioritisation beyond basic category prediction.
+### References
 
-The Cohort 10 implementation therefore serves as a technical proof of concept for the NLP workflow, while future iterations would focus on validating its usefulness and safety in the intended consumer-complaint domain.
-
----
-
-## 👥 Team
-
-**Team Upemba**  
-TRI AI Saturdays — Cohort 10  
-Google DeepMind AI Research Foundations
-
----
-
-## 🙏 Acknowledgment
-
-We acknowledge the TRI AI Saturdays program, the Cohort 10 facilitators and mentors, and the Google DeepMind AI Research Foundations curriculum for providing the learning environment and resources that supported this project.
-
-We also acknowledge the benchmark dataset and challenge environment that enabled the team to develop and evaluate the technical prototype within the Cohort 10 timeline.
+* [ComplaintSense Competition — Kaggle](https://www.kaggle.com/competitions/complaint-sense-consumer-complaint-classification-challenge/overview)
+* [Google Skills — DeepMind AI Research Foundations](https://www.skills.google/paths/234)
