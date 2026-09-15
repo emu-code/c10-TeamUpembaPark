@@ -58,6 +58,29 @@ The final model was then used to generate predictions for the 160 unlabeled test
 
 ## Reproduction
 
+This notebook is written to run inside a Kaggle kernel and reads/writes via
+`/kaggle/input` and `/kaggle/working`. The same, unmodified notebook can be
+run in two ways:
+
+### Option A — Run on Kaggle (recommended)
+
+1. Upload `notebook.ipynb` to a new Kaggle notebook (or open the existing one).
+2. Attach the ComplaintSense competition dataset: **Add Input → Competitions**
+   → search for "ComplaintSense" → attach.
+3. Attach a DistilBERT model: **Add Input → Models** → search "DistilBERT base
+   uncased" → choose a Transformers/PyTorch variant with `config.json`,
+   tokenizer files, and `model.safetensors` (or `pytorch_model.bin`).
+4. Click **Save Version → Save & Run All** to execute the notebook top to
+   bottom in a clean environment.
+5. `submission.csv` is written to `/kaggle/working/submission.csv`
+   (160 predictions).
+
+### Option B — Run locally
+
+Because the code is unmodified from the Kaggle version, running it locally
+means recreating Kaggle's expected folder structure on your own machine,
+rather than editing any paths in the notebook.
+
 1. **Clone the repository:**
 
    `git clone https://github.com/emu-code/c10-team-upembapark.git`
@@ -66,17 +89,34 @@ The final model was then used to generate predictions for the 160 unlabeled test
 
    `cd c10-team-upembapark`
 
-3. **Install the required dependencies:**
+3. **Create and activate a virtual environment, then install dependencies**
 
-   `pip install -r requirements.txt`
+4. **Recreate the Kaggle directory structure locally**
 
-4. **Open the project notebook** and run the cells in order from the beginning to reproduce preprocessing, model training, evaluation, and submission generation.
+5. **Place the competition data** (`train_complaints.csv`, `test_complaints.csv`)
 
-5. **Attach the ComplaintSense competition dataset** when prompted if running the notebook in Kaggle.
+6. **Download DistilBERT into the same input directory** so the notebook's
+   model-search cell can find it:
 
-The notebook generates the final `submission.csv` containing the 160 test predictions.
+```python
+   from huggingface_hub import snapshot_download
+   snapshot_download(
+       repo_id="distilbert-base-uncased",
+       local_dir="/kaggle/input/distilbert-base-uncased",
+   )
+```
 
-N/B: The pretrained DistilBERT model is not stored in the repository due to its size. When the notebook is executed, it automatically downloads distilbert-base-uncased from Hugging Face and fine-tunes it on the competition training data.
+7. **Open the notebook** with the `c10-teamupemba` kernel and run the cells
+   in order from the beginning.
+
+8. `submission.csv` is written to `/kaggle/working/submission.csv`
+   (160 predictions).
+
+N/B: The pretrained DistilBERT model is not stored in the repository due to
+its size. It must be attached on Kaggle (Option A) or downloaded via
+`huggingface_hub` into the local `/kaggle/input` mirror (Option B, step 6)
+before the notebook's model-loading cell will succeed.
+   
 ---
 
 ## Appendix
@@ -88,6 +128,7 @@ N/B: The pretrained DistilBERT model is not stored in the repository due to its 
 * [Adedotun Onasanya](https://github.com/adedotguy)
 * [David Arfo](https://github.com/Daxe5)
 
+* Program: TRI-AI  Lagos
 ### References
 
 * [ComplaintSense Competition — Kaggle](https://www.kaggle.com/competitions/complaint-sense-consumer-complaint-classification-challenge/overview)
